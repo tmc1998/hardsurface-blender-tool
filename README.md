@@ -1,2 +1,2 @@
-# Hardsurface Tool
+# HardSurface Tool
 A tool collection for Blender
