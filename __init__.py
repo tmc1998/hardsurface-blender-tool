@@ -3,7 +3,7 @@ bl_info = {
     "author" : "Canh Tran",
     "description" : "This add-on provides a set of custom tools for working efficiently in Blender.",
     "blender" : (2, 80, 0),
-    "version" : (1, 0, 0),
+    "version" : (1, 0, 1),
     "location" : "3D View > N",
     "warning" : "",
     "category" : "Object",
