@@ -3,7 +3,7 @@ bl_info = {
     "author" : "Canh Tran",
     "description" : "This add-on provides a set of custom tools for working efficiently in Blender.",
     "blender" : (2, 80, 0),
-    "version" : (1, 0, 1),
+    "version" : (1, 0, 2),
     "location" : "3D View > N",
     "warning" : "",
     "category" : "Object",
@@ -26,25 +26,25 @@ SHIRO_TOOL_PATH = SHIRO_TOOL_PATH.replace("\\", "/")
 sys.path.append(SHIRO_TOOL_PATH)
 
 # Import function
-import Shiro_Tools.operators.select as select_operators
-import Shiro_Tools.operators.bridge as bridge_operators
-import Shiro_Tools.operators.modifier as modifier_operators
-import Shiro_Tools.operators.vertex_normal as vertex_normal_operators
-import Shiro_Tools.operators.vertex_group as vertex_group_operators
-import Shiro_Tools.operators.shapekey as shapekey_operators
-import Shiro_Tools.operators.collection as collection_operators
-import Shiro_Tools.operators.uv as uv_operators
-import Shiro_Tools.operators.material as material_operators
-import Shiro_Tools.operators.model as model_operators
-import Shiro_Tools.operators.check as check_operators
-import Shiro_Tools.operators.capture as capture_operators
-import Shiro_Tools.operators.bakeset as bakeset_operators
-import Shiro_Tools.operators.coalition as coalition_operators
-import Shiro_Tools.properties as properties
-import Shiro_Tools.icons as icons
+from .operators import select as select_operators
+from .operators import bridge as bridge_operators
+from .operators import modifier as modifier_operators
+from .operators import vertex_normal as vertex_normal_operators
+from .operators import vertex_group as vertex_group_operators
+from .operators import shapekey as shapekey_operators
+from .operators import collection as collection_operators
+from .operators import uv as uv_operators
+from .operators import material as material_operators
+from .operators import model as model_operators
+from .operators import check as check_operators
+from .operators import capture as capture_operators
+from .operators import bakeset as bakeset_operators
+from .operators import coalition as coalition_operators
+from . import properties as properties
+from . import icons as icons
 
 # Import UI
-import Shiro_Tools.ui as ui
+from . import ui as ui
 
 # Preferences
 

@@ -6,10 +6,10 @@ try:
 except:
     pass
 
-import Shiro_Tools.variable as my_variables
+from . import variable as my_variables
 reload(my_variables)
 
-from Shiro_Tools.icons import preview_collections
+from .icons import preview_collections
 
 # UI LOGIC
 

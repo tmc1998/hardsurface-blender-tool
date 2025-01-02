@@ -7,8 +7,11 @@ try:
 except:
 	pass
 
-import Shiro_Tools.variable as my_variables
+from .. import variable as my_variables
 reload(my_variables)
+
+from .. import utility as my_utility
+reload(my_utility)
 
 # --- SHAPE KEY ACTION LOGIC --- #
 class OBJECT_OT_SHAPEKEYS_ACTION(bpy.types.Operator):# Operator class should have _OT_ in it

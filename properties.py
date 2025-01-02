@@ -19,8 +19,8 @@ from bpy.types import (Panel,
 					   PropertyGroup,
 					   )
 
-import Shiro_Tools.controller as controller
-reload(controller)
+from . import controller as my_controller
+reload(my_controller)
 
 # Store properties in the active scene
 class My_Properties_Setup(PropertyGroup):
@@ -147,7 +147,7 @@ class My_Properties_Setup(PropertyGroup):
 	name="",
 	description="Rizom path",
 	subtype='FILE_PATH',
-	update=controller.update_rizom_path_ui)
+	update=my_controller.update_rizom_path_ui)
 	#endregion
 
 	#region Bevel
@@ -158,7 +158,7 @@ class My_Properties_Setup(PropertyGroup):
 		min=0.001,
 		step=0.001,
 		default=0.001,
-		update=controller.bevel_value_ui_change)
+		update=my_controller.bevel_value_ui_change)
 	
 	bpy.types.Scene.bevel_segment_value = bpy.props.IntProperty(
 		name="Bevel Segment Value",
@@ -166,14 +166,14 @@ class My_Properties_Setup(PropertyGroup):
 		min=1,
 		max=100,
 		default=1,
-		update=controller.bevel_segment_ui_change)
+		update=my_controller.bevel_segment_ui_change)
 
 	bpy.types.Scene.bevel_type = bpy.props.EnumProperty(name="Type",
 		items=(("VGROUP", "Vertex Group", "Use bevel weights to determine how much bevel is applied in edge mode."),
 				("WEIGHT", "Weight", "Use vertex group weights to select whether vertex or edge is beveled."),
 				("ANGLE", "Angle", "Only bevel edges with sharp enough angles between faces.")),
 		description="Select bevel type",
-		update=controller.update_bevel_modifier_name_ui
+		update=my_controller.update_bevel_modifier_name_ui
 	)
 	#endregion
 
@@ -271,7 +271,7 @@ class My_Properties_Setup(PropertyGroup):
 		description="Export FBX Path",
 		default="D:/",
 		subtype='FILE_PATH',
-		update=controller.update_bakeset_export_path_ui)
+		update=my_controller.update_bakeset_export_path_ui)
 	#endregion
 
 
@@ -466,7 +466,7 @@ class My_Properties_Setup(PropertyGroup):
 		min=10,
 		max=200,
 		step=10,
-		update=controller.camera_zoom_value_ui_change)
+		update=my_controller.camera_zoom_value_ui_change)
 
 
 	bpy.types.Scene.screenshot_path = bpy.props.StringProperty(
@@ -474,7 +474,7 @@ class My_Properties_Setup(PropertyGroup):
 		description="Screenshot path",
 		default="D:/",
 		subtype='DIR_PATH',
-		update=controller.update_screenshot_path_ui)
+		update=my_controller.update_screenshot_path_ui)
 
 	#endregion
 
