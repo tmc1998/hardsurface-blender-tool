@@ -25,7 +25,7 @@ class OBJECT_OT_CHECK_ACTION(bpy.types.Operator):# Operator class should have _O
             ('CHECK_ALL', 'check all', 'check all'),
             ('CHECK_NGONS_FACE', 'check n-gons face', 'check n-gons face'),
             ('CHECK_NON_MANIFOLD', 'check non-manifold vertex/edge', 'check non-manifold vertex/edge'),
-            ('CHECK_CONCAVE_FACE', 'check concave face', 'check concave face'),
+            ('CHECK_SMALL_EDGE', 'check small edge', 'check small edge'),
             ('CHECK_ISOLATED_VERTEX', 'check isolated vertex', 'check isolated vertex'),
             ('CHECK_SILHOUETTE', 'check silhouette', 'check silhouette'),
         ]
@@ -38,8 +38,8 @@ class OBJECT_OT_CHECK_ACTION(bpy.types.Operator):# Operator class should have _O
             self.check_ngons_face_function(context)
         elif self.action == 'CHECK_NON_MANIFOLD':
             self.check_non_manifold_function(context)
-        elif self.action == 'CHECK_CONCAVE_FACE':
-            self.check_concave_face_function(context)
+        elif self.action == 'CHECK_SMALL_EDGE':
+            self.check_small_edge_function(context)
         elif self.action == 'CHECK_ISOLATED_VERTEX':
             self.check_isolated_vertex_function(context)
         elif self.action == 'CHECK_SILHOUETTE':
@@ -66,7 +66,7 @@ class OBJECT_OT_CHECK_ACTION(bpy.types.Operator):# Operator class should have _O
             bpy.ops.object.select_all(action='DESELECT')
             for obj in selection:
                 obj.select_set(True)
-            err = list(set(err + self.check_concave_face_function(context)))
+            err = list(set(err + self.check_small_edge_function(context)))
             bpy.ops.object.mode_set(mode='OBJECT')
 
             bpy.ops.object.select_all(action='DESELECT')
@@ -161,52 +161,38 @@ class OBJECT_OT_CHECK_ACTION(bpy.types.Operator):# Operator class should have _O
             my_utility.show_message(context, "ERROR", "Please select object to checking!")
             return None
 
-    def check_concave_face_function(self, context):
+    def check_small_edge_function(self, context):
         selection = [obj for obj in bpy.context.selected_objects]
         if selection:
             err_obj = []
-            # check concave face
-            tolerance = 0  # increase to something like .01 or .1 to ignore small concavities
+            # check small edge
+            tolerance = 0.001  # increase to something like .1 or 1 to ignore small edge
             for obj in selection:
                 bpy.ops.object.select_all(action='DESELECT')
                 obj.select_set(True)
                 bpy.context.view_layer.objects.active = obj
                 bpy.ops.object.mode_set(mode = 'EDIT') 
-                bpy.ops.mesh.select_mode(type="FACE")
+                bpy.ops.mesh.select_mode(type="EDGE")
                 bpy.ops.mesh.select_all(action = 'DESELECT')
-                bpy.ops.object.mode_set(mode = 'OBJECT')
 
-                me = bpy.context.active_object.data
-                me.calc_loop_triangles()
-                poly_i_to_tris = {}
-                for tri in me.loop_triangles:
-                    poly_i_to_tris.setdefault(tri.polygon_index, []).append(tri)
-
-                for i, tris in poly_i_to_tris.items():
-                    try:
-                        t1, t2 = tris
-                    except ValueError:
-                        continue  # not a quad
-                    dist = (t1.center - t2.center).length
-                    tolerance *= dist  # makes tolerance relative
-                    ray_len = dist/2  # making sure to not overshoot, but I don't think it would be possible
-                    test1 = t1.center + t1.normal*ray_len
-                    test2 = t2.center + t2.normal*ray_len
-                    test_dist = (test1 - test2).length
-                    if test_dist < dist - tolerance:
-                        # concave
-                        me.polygons[i].select = True
-
+                edge_lengths = []
+                me = context.edit_object.data
+                bm = bmesh.from_edit_mesh(me)
+                for e in bm.edges:
+                    if e.calc_length() < tolerance:
+                        e.select_set(True)
+                        edge_lengths.append(e)
+                bpy.ops.object.mode_set(mode='OBJECT')
             # Get error mesh list
             for obj in selection:
                 bpy.ops.object.mode_set(mode='OBJECT')
                 bpy.ops.object.select_all(action='DESELECT')
                 bpy.context.view_layer.objects.active = obj
                 bpy.ops.object.mode_set(mode='EDIT')
-                bpy.ops.mesh.select_mode(type='FACE')
+                bpy.ops.mesh.select_mode(type='EDGE')
                 bm = bmesh.from_edit_mesh(context.edit_object.data)
-                selected_faces = [f for f in bm.faces if f.select]
-                if len(selected_faces) > 0:
+                selected_edges = [e for e in bm.edges if e.select]
+                if len(selected_edges) > 0:
                     err_obj.append(obj)
 
             # Select error elements on mesh
@@ -217,11 +203,11 @@ class OBJECT_OT_CHECK_ACTION(bpy.types.Operator):# Operator class should have _O
                     obj.select_set(True)
                     bpy.context.view_layer.objects.active = obj
                 bpy.ops.object.mode_set(mode='EDIT')
-                bpy.ops.mesh.select_mode(type='FACE')
+                bpy.ops.mesh.select_mode(type='EDGE')
                 # Change button icon
-                context.scene.check_concave_face = False
+                context.scene.check_small_edge = False
             else:
-                context.scene.check_concave_face = True
+                context.scene.check_small_edge = True
             return err_obj
         else:
             my_utility.show_message(context, "ERROR", "Please select object to checking!")

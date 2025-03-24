@@ -528,8 +528,8 @@ class HardSurfaceToolPanel(bpy.types.Panel):
 
             row = child_box.row(align=True)
             split = row.split(factor=0.85, align=True)
-            split.operator("object.check_action", text = "Check Concave Face").action = "CHECK_CONCAVE_FACE"
-            if scene.check_concave_face:
+            split.operator("object.check_action", text = "Check Small Edge").action = "CHECK_SMALL_EDGE"
+            if scene.check_small_edge:
                 split.operator("object.check_action", text = "", icon_value = true_icon.icon_id)
             else:
                 split.operator("object.check_action", text = "", icon_value = false_icon.icon_id)
@@ -671,34 +671,4 @@ class CoalitionToolPanel(bpy.types.Panel):
             row = child_box.row()
             row.operator("object.coalition_action", text = "Setup Sculpting Shape Keys").action = "SETUP_SHAPE_KEYS"
             row.scale_y = 1.5
-
-# class SelectPanel(ModelTool_UI, bpy.types.Panel):
-#     bl_idname = "OBJECT_PT_SelectPanel" # _PT_ : help blender define which is Panel||Menu||Operator
-#     bl_label = "Select"
-#     bl_space_type = "VIEW_3D"
-#     bl_region_type = "UI"
-#     bl_category = "Model"
-
-#     def draw(self, context):
-#         # Scene
-#         scene = context.scene
-#         # Main layout
-#         main_layout = self.layout
-
-#         # Set panel size
-#         main_col_layout = main_layout.column(align=True)
-        
-#         # Some data on the subpanel
-
-#         #region Select edge loop, ring
-#         fast_select_edges_layout = main_col_layout.column()
-#         select_continue_edges_box = fast_select_edges_layout.box()
-#         select_continue_edges_row = select_continue_edges_box.row(align=True)
-#         select_continue_edges_row.operator("object.model_action", text = "Select Continue Edge Loop").action = "SELECT_CONTINUE_EDGE_LOOP"
-#         select_continue_edges_row = select_continue_edges_box.row(align=True)
-#         select_continue_edges_row.operator("object.model_action", text = "Select Continue Edge Ring").action = "SELECT_CONTINUE_EDGE_RING"
-#         select_continue_edges_box.scale_y = 1.5
-
-#         #endregion
-
 

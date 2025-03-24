@@ -220,9 +220,9 @@ class My_Properties_Setup(PropertyGroup):
 		default = True
 		)
 
-	bpy.types.Scene.check_concave_face = bpy.props.BoolProperty(
-		name="Check Concave Face Result",
-		description="Show concave face checking result",
+	bpy.types.Scene.check_small_edge = bpy.props.BoolProperty(
+		name="Check Small Edge Result",
+		description="Show small edge checking result",
 		default = True
 		)
 	
