@@ -1,5 +1,7 @@
 import bpy
 import bmesh
+import mathutils
+import array
 
 from ..ui import controller
 from ..utility import variable
@@ -31,18 +33,36 @@ class TMC_OP_CheckNonManifold(bpy.types.Operator):
         check_non_manifold_function(self, context)
         return {'FINISHED'}
 
-class TMC_OP_CheckSmallEdge(bpy.types.Operator):
-    bl_idname = "tmc.check_small_edge"
-    bl_label = "Check Small Edge"
-    bl_description = 'check small edge from selected objects'
+class TMC_OP_CheckIntersectFace(bpy.types.Operator):
+    bl_idname = "tmc.check_intersect_face"
+    bl_label = "Check Intersect Face"
+    bl_description = 'check intersect face from selected objects'
 
     def execute(self, context):
-        check_small_edge_function(self, context)
+        check_intersect_face_function(self, context)
+        return {'FINISHED'}
+
+class TMC_OP_CheckZeroEdgeLength(bpy.types.Operator):
+    bl_idname = "tmc.check_zero_edge_length"
+    bl_label = "Check Zero Edge Length"
+    bl_description = 'check zero edge length from selected objects'
+
+    def execute(self, context):
+        check_zero_edge_length_function(self, context)
+        return {'FINISHED'}
+
+class TMC_OP_CheckZeroFaceArea(bpy.types.Operator):
+    bl_idname = "tmc.check_zero_face_area"
+    bl_label = "Check Tiny Edge Face"
+    bl_description = 'check tiny edge face from selected objects'
+
+    def execute(self, context):
+        check_zero_face_area_function(self, context)
         return {'FINISHED'}
 
 class TMC_OP_CheckIsolatedVertex(bpy.types.Operator):
     bl_idname = "tmc.check_isolated_vertex"
-    bl_label = "Check Isolated Vertex"
+    bl_label = "Isolated Vertex"
     bl_description = 'check isolated vertex from selected objects'
 
     def execute(self, context):
@@ -77,7 +97,19 @@ def check_all(self, context):
         bpy.ops.object.select_all(action='DESELECT')
         for obj in selection:
             obj.select_set(True)
-        err = list(set(err + check_small_edge_function(self, context)))
+        err = list(set(err + check_intersect_face_function(self, context)))
+        bpy.ops.object.mode_set(mode='OBJECT')
+
+        bpy.ops.object.select_all(action='DESELECT')
+        for obj in selection:
+            obj.select_set(True)
+        err = list(set(err + check_zero_edge_length_function(self, context)))
+        bpy.ops.object.mode_set(mode='OBJECT')
+
+        bpy.ops.object.select_all(action='DESELECT')
+        for obj in selection:
+            obj.select_set(True)
+        err = list(set(err + check_zero_face_area_function(self, context)))
         bpy.ops.object.mode_set(mode='OBJECT')
 
         bpy.ops.object.select_all(action='DESELECT')
@@ -172,7 +204,61 @@ def check_non_manifold_function(self, context):
         controller.show_message(context, "ERROR", "Please select object to checking!")
         return None
 
-def check_small_edge_function(self, context):
+def check_intersect_face_function(self, context):
+    selection = [obj for obj in bpy.context.selected_objects]
+    if selection:
+        err_obj = []
+        for obj in selection:
+            bpy.ops.object.select_all(action='DESELECT')
+            obj.select_set(True)
+            bpy.context.view_layer.objects.active = obj
+            bpy.ops.object.mode_set(mode = 'EDIT')
+            bpy.ops.mesh.select_mode(type="FACE")
+            bpy.ops.mesh.select_all(action = 'DESELECT')
+
+            selected_faces = []
+            me = context.edit_object.data
+            bm = bmesh.from_edit_mesh(me)
+            tree = mathutils.bvhtree.BVHTree.FromBMesh(bm, epsilon=0.00001)
+            overlap = tree.overlap(tree)
+            selected_faces = list({i for i_pair in overlap for i in i_pair})
+            bm.faces.ensure_lookup_table()
+            for i in selected_faces:
+                bm.faces[i].select = True
+
+            bpy.ops.object.mode_set(mode='OBJECT')
+
+        # Get error mesh list
+        for obj in selection:
+            bpy.ops.object.mode_set(mode='OBJECT')
+            bpy.ops.object.select_all(action='DESELECT')
+            bpy.context.view_layer.objects.active = obj
+            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.mesh.select_mode(type='FACE')
+            bm = bmesh.from_edit_mesh(context.edit_object.data)
+            selected_faces = [f for f in bm.faces if f.select]
+            if len(selected_faces) > 0:
+                err_obj.append(obj)
+
+        # Select error elements on mesh
+        bpy.ops.object.mode_set(mode='OBJECT')
+        bpy.ops.object.select_all(action='DESELECT')
+        if len(err_obj) > 0: 
+            for obj in err_obj:
+                obj.select_set(True)
+                bpy.context.view_layer.objects.active = obj
+            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.mesh.select_mode(type='FACE')
+            # Change button icon
+            context.scene.check_intersect_face = False
+        else:
+            context.scene.check_intersect_face = True
+        return err_obj
+    else:
+        controller.show_message(context, "ERROR", "Please select object to checking!")
+        return None
+
+def check_zero_edge_length_function(self, context):
     selection = [obj for obj in bpy.context.selected_objects]
     if selection:
         err_obj = []
@@ -216,9 +302,61 @@ def check_small_edge_function(self, context):
             bpy.ops.object.mode_set(mode='EDIT')
             bpy.ops.mesh.select_mode(type='EDGE')
             # Change button icon
-            context.scene.check_small_edge = False
+            context.scene.check_zero_edge_length = False
         else:
-            context.scene.check_small_edge = True
+            context.scene.check_zero_edge_length = True
+        return err_obj
+    else:
+        controller.show_message(context, "ERROR", "Please select object to checking!")
+        return None
+
+def check_zero_face_area_function(self, context):
+    selection = [obj for obj in bpy.context.selected_objects]
+    if selection:
+        err_obj = []
+        # check small edge
+        tolerance = context.scene.min_face_area_value  # increase to something like .001 or .00001 to ignore small face
+        for obj in selection:
+            bpy.ops.object.select_all(action='DESELECT')
+            obj.select_set(True)
+            bpy.context.view_layer.objects.active = obj
+            bpy.ops.object.mode_set(mode = 'EDIT') 
+            bpy.ops.mesh.select_mode(type="FACE")
+            bpy.ops.mesh.select_all(action = 'DESELECT')
+
+            face_areas = []
+            me = context.edit_object.data
+            bm = bmesh.from_edit_mesh(me)
+            for f in bm.faces:
+                if f.calc_area() < tolerance:
+                    f.select_set(True)
+                    face_areas.append(f)
+            bpy.ops.object.mode_set(mode='OBJECT')
+        # Get error mesh list
+        for obj in selection:
+            bpy.ops.object.mode_set(mode='OBJECT')
+            bpy.ops.object.select_all(action='DESELECT')
+            bpy.context.view_layer.objects.active = obj
+            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.mesh.select_mode(type='FACE')
+            bm = bmesh.from_edit_mesh(context.edit_object.data)
+            selected_faces = [f for f in bm.faces if f.select]
+            if len(selected_faces) > 0:
+                err_obj.append(obj)
+
+        # Select error elements on mesh
+        bpy.ops.object.mode_set(mode='OBJECT')
+        bpy.ops.object.select_all(action='DESELECT')
+        if len(err_obj) > 0: 
+            for obj in err_obj:
+                obj.select_set(True)
+                bpy.context.view_layer.objects.active = obj
+            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.mesh.select_mode(type='FACE')
+            # Change button icon
+            context.scene.check_zero_face_area = False
+        else:
+            context.scene.check_zero_face_area = True
         return err_obj
     else:
         controller.show_message(context, "ERROR", "Please select object to checking!")

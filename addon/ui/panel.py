@@ -486,7 +486,7 @@ class TMC_MT_Main_Panel(bpy.types.Panel):
 			row.scale_y = 1.5
 			row = child_box.row(align=True)
 			split = row.split(factor=0.85, align=True)
-			split.operator("tmc.check_ngons_face", text = "Check N-gons Face")
+			split.operator("tmc.check_ngons_face", text = "N-gons Face")
 			if scene.check_ngons_face:
 				split.operator("tmc.check_ngons_face", text = "", icon_value = true_icon.icon_id)
 			else:
@@ -495,7 +495,7 @@ class TMC_MT_Main_Panel(bpy.types.Panel):
 			
 			row = child_box.row(align=True)
 			split = row.split(factor=0.85, align=True)
-			split.operator("tmc.check_non_manifold", text = "Check Non-manifold")
+			split.operator("tmc.check_non_manifold", text = "Non-manifold")
 			if scene.check_non_manifold:
 				split.operator("tmc.check_non_manifold", text = "", icon_value = true_icon.icon_id)
 			else:
@@ -504,7 +504,7 @@ class TMC_MT_Main_Panel(bpy.types.Panel):
 
 			row = child_box.row(align=True)
 			split = row.split(factor=0.85, align=True)
-			split.operator("tmc.check_isolated_vertex", text = "Check Isolated Vertex")
+			split.operator("tmc.check_isolated_vertex", text = "Isolated Vertex")
 			if scene.check_isolated_vertex:
 				split.operator("tmc.check_isolated_vertex", text = "", icon_value = true_icon.icon_id)
 			else:
@@ -513,13 +513,33 @@ class TMC_MT_Main_Panel(bpy.types.Panel):
 
 			row = child_box.row(align=True)
 			split = row.split(factor=0.85, align=True)
-			small_split = split.split(factor=0.65, align=True)
-			small_split.operator("tmc.check_small_edge", text = "Check Small Edge")
-			small_split.prop(scene, "min_edge_length_value", text="")
-			if scene.check_small_edge:
-				split.operator("tmc.check_small_edge", text = "", icon_value = true_icon.icon_id)
+			split.operator("tmc.check_intersect_face", text = "Intersect Face")
+			if scene.check_intersect_face:
+				split.operator("tmc.check_intersect_face", text = "", icon_value = true_icon.icon_id)
 			else:
-				split.operator("tmc.check_small_edge", text = "", icon_value = false_icon.icon_id)
+				split.operator("tmc.check_intersect_face", text = "", icon_value = false_icon.icon_id)
+			row.scale_y = 1.5
+
+			row = child_box.row(align=True)
+			split = row.split(factor=0.85, align=True)
+			small_split = split.split(factor=0.65, align=True)
+			small_split.operator("tmc.check_zero_edge_length", text = "Zero Edge Length")
+			small_split.prop(scene, "min_edge_length_value", text="")
+			if scene.check_zero_edge_length:
+				split.operator("tmc.check_zero_edge_length", text = "", icon_value = true_icon.icon_id)
+			else:
+				split.operator("tmc.check_zero_edge_length", text = "", icon_value = false_icon.icon_id)
+			row.scale_y = 1.5
+
+			row = child_box.row(align=True)
+			split = row.split(factor=0.85, align=True)
+			small_split = split.split(factor=0.65, align=True)
+			small_split.operator("tmc.check_zero_face_area", text = "Zero Face Area")
+			small_split.prop(scene, "min_face_area_value", text="")
+			if scene.check_zero_face_area:
+				split.operator("tmc.check_zero_face_area", text = "", icon_value = true_icon.icon_id)
+			else:
+				split.operator("tmc.check_zero_face_area", text = "", icon_value = false_icon.icon_id)
 			row.scale_y = 1.5
 
 			child_box = main_box.box()

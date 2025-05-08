@@ -28,7 +28,7 @@ class TMC_OP_SetEdgeLength(bpy.types.Operator):
 			two_vertices = [v for v in edge.verts]
 			lock_vertex_current_edge = list(set(two_vertices) & set(lock_vertex_list))
 			if len(lock_vertex_current_edge) == 1:
-				bpy.ops.transform.resize(value=(scale, scale, scale), center_override = lock_vertex_current_edge[0].co)
+				bpy.ops.transform.resize(value=(scale, scale, scale), center_override = context.active_object.matrix_world @ lock_vertex_current_edge[0].co)
 			else:
 				bpy.ops.transform.resize(value=(scale, scale, scale))
 		return {'FINISHED'}

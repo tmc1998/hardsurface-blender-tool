@@ -181,23 +181,35 @@ class TMC_UIProperty(bpy.types.PropertyGroup):
 		default = True
 		)
 
+	bpy.types.Scene.check_intersect_face = bpy.props.BoolProperty(
+		name="Check Intersect Face Result",
+		description="Show intersect face checking result",
+		default = True
+		)
+
 	bpy.types.Scene.check_non_manifold = bpy.props.BoolProperty(
 		name="Check Non-Manifold Result",
 		description="Show non-manifold checking result",
 		default = True
 		)
 
-	bpy.types.Scene.check_small_edge = bpy.props.BoolProperty(
-		name="Check Small Edge Result",
-		description="Show small edge checking result",
+	bpy.types.Scene.check_zero_edge_length = bpy.props.BoolProperty(
+		name="Check Zero Edge Length Result",
+		description="Show zero edge length checking result",
 		default = True
 		)
-	
+
+	bpy.types.Scene.check_zero_face_area = bpy.props.BoolProperty(
+		name="Check Tiny Edge Leg Result",
+		description="Show zero face area checking result",
+		default = True
+		)
+
 	bpy.types.Scene.check_isolated_vertex = bpy.props.BoolProperty(
 		name="Check Isolated Vertex Result",
 		description="Show isolated vertex checking result",
 		default = True
-		)	
+		)
 
 	bpy.types.Scene.viewport_background_color = bpy.props.FloatVectorProperty(
 		name="Colour",
@@ -245,7 +257,14 @@ class TMC_UIProperty(bpy.types.PropertyGroup):
 	bpy.types.Scene.min_edge_length_value = bpy.props.FloatProperty(
 		name="Min Edge Length Value",
 		description=":",
-		default=0.0012)
+		precision=4,
+		default=0.001)
+
+	bpy.types.Scene.min_face_area_value = bpy.props.FloatProperty(
+		name="Min Face Area Value",
+		description=":",
+		precision=7,
+		default=0.00001)
 	#endregion
 
 	#region edge length properties
